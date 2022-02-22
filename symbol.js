@@ -62,6 +62,12 @@ class MyDate {
     return new Intl.ListFormat("pt-BR", { style: "long", type: "conjunction" }).format(itens)
   }
 
+  *[Symbol.iterator]() {
+    for (const item of this[kItems]) {
+      yield item
+    }
+  }
+
   get [Symbol.toStringTag]() {
     return 'WHAT?'
   }
@@ -82,3 +88,6 @@ assert.throws(() => myDate + 1, TypeError)
 
 // call toPrimitive
 assert.deepStrictEqual(String(myDate), '01 de maio de 2022 e 06 de abril de 2020')
+
+// iterator!
+assert.deepStrictEqual([...myDate], expectedDates)
