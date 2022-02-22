@@ -1,3 +1,4 @@
+const { deepEqual } = require('assert')
 const assert = require('assert')
 
 // --- keys
@@ -48,18 +49,36 @@ class MyDate {
   constructor(...args) {
     this[kItems] = args.map(arg => new Date(...arg))
   }
+
+  [Symbol.toPrimitive](coercionType) {
+    if(coercionType !== "string") throw new TypeError()
+
+    const itens = this[kItems]
+                    .map(item =>
+                            new Intl
+                                .DateTimeFormat("pt-BR", { month: "long", day: "2-digit", year: "numeric" })
+                                .format(item)
+                      )
+    return new Intl.ListFormat("pt-BR", { style: "long", type: "conjunction" }).format(itens)
+  }
+
+  get [Symbol.toStringTag]() {
+    return 'WHAT?'
+  }
 }
 
 const myDate = new MyDate(
   [2022, 05, 01],
-  [2020, 03, 06],
-  [2019, 02, 02]
+  [2020, 03, 06]
 )
 
 const expectedDates = [
   new Date(2022, 05, 01),
-  new Date(2020, 03, 06),
-  new Date(2019, 02, 02)
+  new Date(2020, 03, 06)
 ]
 
-assert.deepStrictEqual(user[Symbol.for('kItems')], expectedDates)
+assert.deepStrictEqual(Object.prototype.toString.call(myDate), '[object WHAT?]')
+assert.throws(() => myDate + 1, TypeError)
+
+// call toPrimitive
+assert.deepStrictEqual(String(myDate), '01 de maio de 2022 e 06 de abril de 2020')
