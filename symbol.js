@@ -68,6 +68,15 @@ class MyDate {
     }
   }
 
+  async *[Symbol.asyncIterator] () {
+    const timeout = ms => new Promise(r => setTimeout(r, ms))
+    for (const item of this[kItems]) {
+      await timeout(100)
+
+      yield item.toISOString()
+    }
+  }
+
   get [Symbol.toStringTag]() {
     return 'WHAT?'
   }
@@ -91,3 +100,14 @@ assert.deepStrictEqual(String(myDate), '01 de maio de 2022 e 06 de abril de 2020
 
 // iterator!
 assert.deepStrictEqual([...myDate], expectedDates)
+
+// ;(async() => {
+//   for await(const item of myDate) {
+//     console.log('asyncIterator', item)
+//   }
+// })
+
+;(async() => {
+  const dates = await Promise.all([...myDate])
+  assert.deepStrictEqual(dates, expectedDates)
+})
